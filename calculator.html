@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> 计算器 </title>
+    <meta charset="utf-8" />
+    <!-- 引入react -->
+    <script src="https://cdn.bootcss.com/react/15.4.2/react.min.js"></script>
+    <script src="https://cdn.bootcss.com/react/15.4.2/react-dom.min.js"></script>
+    <script src="https://cdn.bootcss.com/babel-standalone/6.22.1/babel.min.js"></script>
+    <style>
+        #gridPanel {
+            background-color: #ebeaea;
+            width: 1100px;
+            height: 700px;
+            padding-right: 10px;
+        }
+        #left-area {
+            width: 800px;
+            float: left;
+            height: 700px;
+        }
+        #right-area {
+            width: 295px;
+            float: right;
+            height: 700px;
+        }
+        #tilte-input {
+            width: 100%;
+            height: 200px;
+        }
+        .expression {
+            font-size: 14px;
+            color: #333333;
+            width: 100%;
+            height: 20px;
+            padding-top: 50px;
+            text-align: right;
+        }
+        .current{
+            font-size: 40px;
+            font-weight: bold;
+            color: #000;
+            width: 100%;
+            height: 120px;
+            text-align: right;
+        }
+        #button-area {
+            width: 100%;
+            height: 500px;
+        }
+        #button-area .button {
+            width: 200px;
+            float: left;
+            height: 100px;
+            background-color: white;
+            font-size: 38px;
+            line-height: 100px;
+            text-align: center;
+        }
+        #button-area .button:hover {
+            background-color: #d6d6d6;
+        }
+        .history-title {
+            margin-top: 10px;
+            margin-left: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            border-bottom: 5px solid #0078D7;
+            width: 80px;
+        }
+        .history-list {
+            width: 100%;
+            margin-top: 40px;
+        }
+        .history-expression {
+            width: 100%;
+            font-size: 12px;
+            color: #333333;
+            width: 100%;
+            text-align: right;
+        }
+        .history-result {
+            width: 100%;
+            color: #000;
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <!-- 引入计算逻辑 -->
+    <script src="calculator.js"></script>
+    <script type="text/babel">
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    num: 0, // 显示数字
+                    status: 2, // 初始值为数组按钮 0为计算按钮 1为功能按钮
+                    calculation: [], // 计算数组
+                    result: 0,  // 计算结果
+                    history: [] // 历史记录
+                }
+            }
+
+            render() {
+                return (
+                    <div id="gridPanel">
+                        <div id="left-area">
+                            <div id="tilte-input">
+                                {/* 计算数组区域 */}
+                                <div className="expression">
+                                    {
+                                        this.state.calculation && this.state.calculation.length > 0 && this.state.calculation.map((key)=>{
+                                            return key+' '
+                                        })
+                                    }
+                                </div>
+                                {/* 数字区域或者计算结果区域 */}
+                                <div className="current">{this.state.status === 0 ? this.state.result : this.state.num}</div>
+                            </div>
+                            <div id="button-area">
+                                {/* 绑定点击事件 */}
+                                <div className="button" onClick={clickBtn.bind(this, '%')}>%</div>
+                                <div className="button" onClick={clickBtn.bind(this, 'CE')}>CE</div>
+                                <div className="button" onClick={clickBtn.bind(this, 'C')}>C</div>
+                                <div className="button" onClick={Calculation.bind(this, '÷')}>÷</div>
+                                <div className="button" onClick={num.bind(this, '7')}>7</div>
+                                <div className="button" onClick={num.bind(this, '8')}>8</div>
+                                <div className="button" onClick={num.bind(this, '9')}>9</div>
+                                <div className="button" onClick={Calculation.bind(this, '×')}>×</div>
+                                <div className="button" onClick={num.bind(this, '4')}>4</div>
+                                <div className="button" onClick={num.bind(this, '5')}>5</div>
+                                <div className="button" onClick={num.bind(this, '6')}>6</div>
+                                <div className="button" onClick={Calculation.bind(this, '-')}>－</div>
+                                <div className="button" onClick={num.bind(this, '1')}>1</div>
+                                <div className="button" onClick={num.bind(this, '2')}>2</div>
+                                <div className="button" onClick={num.bind(this, '3')}>3</div>
+                                <div className="button" onClick={Calculation.bind(this, '+')}>＋</div>
+                                <div className="button" onClick={num.bind(this, '±')}>±</div>
+                                <div className="button" onClick={num.bind(this, '0')}>0</div>
+                                <div className="button" onClick={num.bind(this, '.')}>.</div>
+                                <div className="button" onClick={clickBtn.bind(this, '=')}>＝</div>
+
+                            </div>
+                        </div>
+                        <div id="right-area">
+                            <div className="history-title">历史记录</div>
+                            {
+                                // 遍历历史记录并渲染
+                                this.state.history && this.state.history.length > 0 && this.state.history.map((item)=>{
+                                    return (
+                                        <div className="history-list">
+                                            {/* 计算数组 */}
+                                            <div className="history-expression">
+                                                {
+                                                    item.calculation && item.calculation.length > 0 && item.calculation.map((key)=>{
+                                                        return key+' '
+                                                    })
+                                                }
+                                            </div>
+                                            {/* 计算结果 */}
+                                            <div className="history-result">{item.result}</div>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    </div>
+                )
+            }
+        }
+        ReactDOM.render(<App />, document.getElementById('root'))
+    </script>
+
+    
+     
+    <!-- <script type="text/javascript">
+        
+
+    </script> -->
+</body>
+
+</html>
